@@ -57,7 +57,15 @@ class PHIGuard:
 class AuditTrail:
     """Cryptographic Tamper-Evident HMAC-SHA256 Audit Trail."""
     def __init__(self, secret_key: Optional[str] = None):
-        self.secret_key = (secret_key or os.getenv("AUDIT_SECRET_KEY", "crispr-prime-editing-pegdna-agent-master-audit-key-2026")).encode("utf-8")
+        resolved_key = secret_key or os.getenv("AUDIT_SECRET_KEY")
+        if not resolved_key:
+            raise SecurityException(
+                "AUDIT_SECRET_KEY environment variable must be set. "
+                "Do not use hardcoded defaults in production."
+            )
+        if len(resolved_key) < 16:
+            raise SecurityException("AUDIT_SECRET_KEY must be at least 16 characters long.")
+        self.secret_key = resolved_key.encode("utf-8")
         self.logs: List[Dict[str, Any]] = []
 
     def log(self, actor: str, actor_tier: str, event_type: str, details: Dict[str, Any]) -> Dict[str, Any]:
@@ -84,8 +92,14 @@ class AuditTrail:
 
     def verify_integrity(self) -> bool:
         for i, entry in enumerate(self.logs):
+            # Verify chain linkage
             prev = self.logs[i-1]["current_hash"] if i > 0 else "GENESIS_BLOCK_0000000000000000"
             if entry["prev_hash"] != prev:
+                return False
+            # Verify HMAC signature
+            sign_string = f"{entry['audit_id']}|{entry['timestamp']}|{entry['actor']}|{entry['actor_tier']}|{entry['event_type']}|{entry['payload_hash']}|{entry['prev_hash']}"
+            expected_sig = hmac.new(self.secret_key, sign_string.encode("utf-8"), hashlib.sha256).hexdigest()
+            if not hmac.compare_digest(entry["current_hash"], expected_sig):
                 return False
         return True
 
@@ -93,7 +107,27 @@ class AuditTrail:
         return self.logs
 
 
-GLOBAL_AUDIT = AuditTrail()
+class _LazyAuditTrail:
+    """Lazy-initialized global audit trail. Defers AUDIT_SECRET_KEY check until first use."""
+    def __init__(self):
+        self._instance: Optional[AuditTrail] = None
+
+    def _get(self) -> AuditTrail:
+        if self._instance is None:
+            self._instance = AuditTrail()
+        return self._instance
+
+    def log(self, actor: str, actor_tier: str, event_type: str, details: Dict[str, Any]) -> Dict[str, Any]:
+        return self._get().log(actor, actor_tier, event_type, details)
+
+    def get_trail(self) -> List[Dict[str, Any]]:
+        return self._get().get_trail()
+
+    def verify_integrity(self) -> bool:
+        return self._get().verify_integrity()
+
+
+GLOBAL_AUDIT = _LazyAuditTrail()
 
 
 class AuditLogger:
