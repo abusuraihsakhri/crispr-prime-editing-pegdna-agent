@@ -14,7 +14,7 @@ A small Python and browser toolkit for applying deterministic, repository-define
 - FastAPI endpoints for health, evaluation, chat-style mock responses, and audit metadata.
 - In-memory HMAC-SHA256 audit chaining for the audited Python workflow.
 - Pattern-based outbound identifier guard for several common identifier formats.
-- Static GitHub Pages interface that runs entirely in the browser with no backend request.
+- Responsive GitHub Pages workbench with structured results, nominal/elevated/critical example presets, JSON copy/download, and no backend request.
 - Docker image and Compose configuration.
 - Pytest regression tests, lightweight Ruff checks, dependency auditing, and container smoke tests in GitHub Actions.
 
@@ -27,7 +27,7 @@ The GitHub Pages application evaluates the same **root worker thresholds** used 
 - critical flag → critical alert;
 - configured discordance/anomaly keywords → elevated conformance alert.
 
-The browser build intentionally does not implement HMAC signing. A public static page cannot safely contain the secret required for HMAC authentication. Browser inputs remain local to the page; the shipped JavaScript makes no network requests.
+The browser interface shows readable classifications and individual rule findings, with JSON copy and export for reproducibility. It does not persist results between reloads. The browser build intentionally does not implement HMAC signing. A public static page cannot safely contain the secret required for HMAC authentication. Browser inputs remain local to the page; the shipped JavaScript makes no network requests.
 
 Python-in-the-browser is not used. The browser workflow is simple deterministic logic, so Pyodide/PyScript would add substantial WebAssembly download and startup overhead without providing useful functionality.
 

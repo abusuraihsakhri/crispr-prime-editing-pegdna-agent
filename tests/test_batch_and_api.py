@@ -124,6 +124,9 @@ def test_static_web_app_has_no_backend_dependency():
     javascript = (root / "web" / "app.js").read_text(encoding="utf-8")
 
     assert 'src="./app.js"' in html
+    assert 'href="./styles.css"' in html
+    assert 'id="audit-form"' in html
+    assert 'id="results-content"' in html
     assert "fetch(" not in javascript
     assert "XMLHttpRequest" not in javascript
     assert "audit_hash: null" in javascript
