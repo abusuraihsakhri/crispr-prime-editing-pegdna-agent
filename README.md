@@ -14,7 +14,7 @@ A small Python and browser toolkit for applying deterministic, repository-define
 - FastAPI endpoints for health, evaluation, chat-style mock responses, and audit metadata.
 - In-memory HMAC-SHA256 audit chaining for the audited Python workflow.
 - Pattern-based outbound identifier guard for several common identifier formats.
-- Responsive GitHub Pages workbench with structured results, nominal/elevated/critical example presets, JSON copy/download, and no backend request.
+- Compact single-screen desktop GitHub Pages workbench with side-by-side inputs and results, nominal/elevated/critical presets, JSON copy/download, and no backend request; narrow screens use a stacked layout.
 - Docker image and Compose configuration.
 - Pytest regression tests, lightweight Ruff checks, dependency auditing, and container smoke tests in GitHub Actions.
 
