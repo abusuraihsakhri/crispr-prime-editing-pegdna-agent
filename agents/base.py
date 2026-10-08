@@ -1,6 +1,5 @@
 """
-Enterprise Security, PHI Outbound Guard, and HMAC-SHA256 Audit Trail.
-
+Identifier filtering and HMAC-SHA256 audit trail utilities.
 """
 import os
 import re
@@ -10,7 +9,6 @@ import hmac
 import hashlib
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timezone
-from pydantic import BaseModel, Field
 
 PHI_PATTERNS = [
     re.compile(r"\b(?:MRN|mrn)[:#\s-]*\d{4,10}\b", re.IGNORECASE),
@@ -24,7 +22,7 @@ PHI_PATTERNS = [
 
 
 class SecurityException(Exception):
-    """Raised when outbound data violates HIPAA Safe Harbor or contains raw PHI."""
+    """Raised when outbound text matches a configured sensitive-identifier pattern."""
     pass
 
 
@@ -38,7 +36,10 @@ def assert_no_phi(text: str) -> None:
         return
     for pattern in PHI_PATTERNS:
         if pattern.search(str(text)):
-            raise SecurityException(f"PHI Outbound Guard Violation: Sensitive identifier detected with pattern {pattern.pattern}")
+            raise SecurityException(
+                "Outbound identifier guard violation: "
+                f"sensitive identifier detected with pattern {pattern.pattern}"
+            )
 
 
 class PHIGuard:
@@ -55,7 +56,7 @@ class PHIGuard:
 
 
 class AuditTrail:
-    """Cryptographic Tamper-Evident HMAC-SHA256 Audit Trail."""
+    """In-memory HMAC-SHA256 chained audit trail."""
     def __init__(self, secret_key: Optional[str] = None):
         resolved_key = secret_key or os.getenv("AUDIT_SECRET_KEY")
         if not resolved_key:
@@ -92,11 +93,9 @@ class AuditTrail:
 
     def verify_integrity(self) -> bool:
         for i, entry in enumerate(self.logs):
-            # Verify chain linkage
             prev = self.logs[i-1]["current_hash"] if i > 0 else "GENESIS_BLOCK_0000000000000000"
             if entry["prev_hash"] != prev:
                 return False
-            # Verify HMAC signature
             sign_string = f"{entry['audit_id']}|{entry['timestamp']}|{entry['actor']}|{entry['actor_tier']}|{entry['event_type']}|{entry['payload_hash']}|{entry['prev_hash']}"
             expected_sig = hmac.new(self.secret_key, sign_string.encode("utf-8"), hashlib.sha256).hexdigest()
             if not hmac.compare_digest(entry["current_hash"], expected_sig):
