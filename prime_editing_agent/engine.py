@@ -1,45 +1,77 @@
 """
-Core Algorithmic Engine & Cryptographic / Biological Logic for PrimeEditing-Designer: pegRNA Primer Binding & RT Template Agent.
-Domain: Genome Engineering
-Standard: Anzalone 2019 Prime Editing Architecture
+Deterministic threshold engine for the lightweight package.
+
+The thresholds are repository constants used for demonstration and testing.
+They are not validated pegRNA design criteria.
 """
-import math
-from typing import Dict, Any, List, Optional
-from .models import FrontierPayload, AgentTelemetryAlert, ExecutionStatus
+from typing import Any, Dict, Optional
 
 
 class FrontierDomainEngine:
-    STANDARD = "Anzalone 2019 Prime Editing Architecture"
+    STANDARD = "Repository-defined rule thresholds"
     PRIMARY_BOUND = 25.0
     SECONDARY_BOUND = 10.0
 
     @classmethod
-    def evaluate_primary_parameter(cls, value: float) -> Optional[Dict[str, Any]]:
+    def evaluate_primary_parameter(
+        cls,
+        value: float,
+    ) -> Optional[Dict[str, Any]]:
         if value > cls.PRIMARY_BOUND:
             return {
-                "summary": "Primary Domain Boundary Deviation",
-                "details": f"Parameter value ({value:.3f}) exceeds operational threshold ({cls.PRIMARY_BOUND:.1f}) under Anzalone 2019 Prime Editing Architecture.",
-                "remediation": "Engage parameter recalibration and algorithmic verification routine.",
+                "summary": "Primary Metric Threshold Exceeded",
+                "details": (
+                    f"Parameter value ({value:.3f}) exceeds the repository "
+                    f"threshold ({cls.PRIMARY_BOUND:.1f})."
+                ),
+                "remediation": (
+                    "Review the input and threshold assumptions before downstream use."
+                ),
             }
         return None
 
     @classmethod
-    def evaluate_secondary_kinetics(cls, value: float, is_critical: bool) -> Optional[Dict[str, Any]]:
+    def evaluate_secondary_kinetics(
+        cls,
+        value: float,
+        is_critical: bool,
+    ) -> Optional[Dict[str, Any]]:
         if value > cls.SECONDARY_BOUND or is_critical:
             return {
-                "summary": "Critical Domain Condition Triggered",
-                "details": f"Secondary index ({value:.3f}) with CriticalFlag={is_critical} demands prioritized resolution.",
-                "remediation": "Initiate automated fail-safe state machine and telemetry alert dispatch.",
+                "summary": (
+                    "Critical Flag Set"
+                    if is_critical
+                    else "Secondary Metric Threshold Exceeded"
+                ),
+                "details": (
+                    f"Secondary metric ({value:.3f}) with "
+                    f"CriticalFlag={is_critical}."
+                ),
+                "remediation": (
+                    "Review the flagged condition before downstream use."
+                ),
             }
         return None
 
     @classmethod
-    def audit_specification_conformance(cls, descriptor: str, attributes: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    def audit_specification_conformance(
+        cls,
+        descriptor: str,
+        attributes: Dict[str, Any],
+    ) -> Optional[Dict[str, Any]]:
+        del attributes
         desc_upper = str(descriptor).upper()
-        if any(flag in desc_upper for flag in ["VIOLATION", "DISCORDANT", "ANOMALY", "MUTANT", "LEAK"]):
+        flags = ("VIOLATION", "DISCORDANT", "ANOMALY", "MUTANT", "LEAK")
+        matched = next((flag for flag in flags if flag in desc_upper), None)
+        if matched:
             return {
-                "summary": "Specification / Protocol Anomaly Identified",
-                "details": f"Telemetry status flag '{descriptor}' violates Anzalone 2019 Prime Editing Architecture conformance matrix.",
-                "remediation": "Execute automated rollback or secondary consensus verification.",
+                "summary": "Configured Discordance Keyword Detected",
+                "details": (
+                    f"Status descriptor '{descriptor}' contains the configured "
+                    f"keyword '{matched}'."
+                ),
+                "remediation": (
+                    "Verify the status descriptor and associated source data."
+                ),
             }
         return None

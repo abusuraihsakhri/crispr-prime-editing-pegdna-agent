@@ -1,11 +1,9 @@
 """
-Pydantic v2 schemas and data definitions for Crispr Prime Editing Pegdna Agent.
-Domain: AI Drug Discovery, Structural Biology & Wet-Lab Robotics
-Standard: wwPDB / IUPAC / OpenSMILES / ISAC Standards
+Pydantic schemas for the audited rule-based workflow.
 """
 import datetime
 from enum import Enum
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List
 from pydantic import BaseModel, Field
 
 
@@ -22,13 +20,13 @@ class SystemIntegrityStatus(str, Enum):
 
 
 class SystemTaskPayload(BaseModel):
-    task_id: str = Field(..., description="Unique task / case identifier")
-    target_identifier: str = Field(..., description="Entity, patient key, or genomic/cryptographic target")
-    primary_metric: float = Field(..., description="Primary domain measurement or score")
-    secondary_metric: float = Field(default=0.0, description="Secondary kinetic or confidence score")
-    status_descriptor: str = Field(default="NOMINAL", description="Status code or phenotype descriptor")
-    is_critical_flag: bool = Field(default=False, description="Emergency escalation or high priority trigger")
-    attributes: Dict[str, Any] = Field(default_factory=dict, description="Metadata key-value pairs")
+    task_id: str = Field(..., description="Unique task identifier")
+    target_identifier: str = Field(..., description="Non-secret target identifier")
+    primary_metric: float = Field(..., description="Primary numeric input")
+    secondary_metric: float = Field(default=0.0, description="Secondary numeric input")
+    status_descriptor: str = Field(default="NOMINAL", description="Status descriptor")
+    is_critical_flag: bool = Field(default=False, description="Explicit critical-priority trigger")
+    attributes: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
     timestamp: str = Field(default_factory=lambda: datetime.datetime.now(datetime.timezone.utc).isoformat())
 
 
@@ -39,7 +37,7 @@ class AgentAlert(BaseModel):
     summary: str
     technical_details: str
     actionable_remediation: str
-    standard_reference: str = "wwPDB / IUPAC / OpenSMILES / ISAC Standards"
+    standard_reference: str = "Repository-defined rule thresholds"
     timestamp: str = Field(default_factory=lambda: datetime.datetime.now(datetime.timezone.utc).isoformat())
 
     def to_dict(self) -> Dict[str, Any]:
@@ -49,7 +47,7 @@ class AgentAlert(BaseModel):
 class ConsensusDossier(BaseModel):
     dossier_id: str
     system_slug: str = "crispr-prime-editing-pegdna-agent"
-    domain: str = "AI Drug Discovery, Structural Biology & Wet-Lab Robotics"
+    domain: str = "Genome Engineering"
     task_id: str
     target_identifier: str
     overall_urgency: UrgencyLevel
@@ -57,7 +55,7 @@ class ConsensusDossier(BaseModel):
     total_alerts: int
     critical_alerts_count: int
     alerts: List[AgentAlert]
-    standard_reference: str = "wwPDB / IUPAC / OpenSMILES / ISAC Standards"
+    standard_reference: str = "Repository-defined rule thresholds"
     consensus_summary: str
     audit_hash: str
     timestamp: str = Field(default_factory=lambda: datetime.datetime.now(datetime.timezone.utc).isoformat())

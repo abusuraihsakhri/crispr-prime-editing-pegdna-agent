@@ -1,17 +1,19 @@
-version: '3.8'
-
 services:
-  crispr-prime-editing-pegdna-engine:
+  crispr-prime-editing-pegdna-agent:
     build: .
-    container_name: crispr-prime-editing-pegdna-engine
     ports:
       - "8000:8000"
     environment:
-      - AUDIT_SECRET_KEY=${AUDIT_SECRET_KEY:?AUDIT_SECRET_KEY must be set in .env file}
-      - MODEL_PROVIDER=mock
+      AUDIT_SECRET_KEY: ${AUDIT_SECRET_KEY:?AUDIT_SECRET_KEY must be set in .env}
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).read()"
       interval: 30s
       timeout: 5s
       retries: 3

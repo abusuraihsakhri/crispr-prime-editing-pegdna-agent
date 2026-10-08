@@ -1,19 +1,22 @@
 """
-FastAPI REST API Server for Crispr Prime Editing Pegdna Agent.
+FastAPI REST API server for the audited rule-based workflow.
 """
-from typing import Dict, Any, List
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from .base import AuditLogger, PHIGuard
-from .models import SystemTaskPayload, ConsensusDossier
+
+from .base import AuditLogger, SecurityException
+from .models import SystemTaskPayload
 from .supervisor import SystemSupervisor
 
 supervisor = SystemSupervisor(model_provider="mock")
 
 app = FastAPI(
     title="Crispr Prime Editing Pegdna Agent API",
-    description="Enterprise Distributed Component Platform (AI Drug Discovery, Structural Biology & Wet-Lab Robotics)",
-    version="3.0.0-ENTERPRISE",
+    description=(
+        "Deterministic rule-based evaluator for repository-defined numeric "
+        "thresholds and status descriptors."
+    ),
+    version="3.0.0",
 )
 
 
@@ -23,7 +26,13 @@ class ChatRequest(BaseModel):
 
 @app.get("/health")
 def health():
-    return {"status": "HEALTHY", "service": "crispr-prime-editing-pegdna-agent", "domain": "AI Drug Discovery, Structural Biology & Wet-Lab Robotics", "standard": "wwPDB / IUPAC / OpenSMILES / ISAC Standards", "version": "3.0.0-ENTERPRISE"}
+    return {
+        "status": "HEALTHY",
+        "service": "crispr-prime-editing-pegdna-agent",
+        "domain": "Genome Engineering",
+        "standard": "Repository-defined rule thresholds",
+        "version": "3.0.0",
+    }
 
 
 @app.get("/metrics")
@@ -31,25 +40,30 @@ def metrics():
     return {
         "dossiers_processed_total": len(supervisor.dossier_registry),
         "audit_blocks_total": len(AuditLogger.get_trail()),
-        "system_status": "NOMINAL_OPTIMAL"
+        "system_status": "NOMINAL_OPTIMAL",
     }
 
 
 @app.post("/api/audit")
 def api_audit(payload: SystemTaskPayload):
-    dossier = supervisor.process_task(payload)
-    return dossier.to_dict()
+    try:
+        dossier = supervisor.process_task(payload)
+        return dossier.to_dict()
+    except SecurityException as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @app.post("/api/chat")
 def api_chat(req: ChatRequest):
     try:
-        ans = supervisor.query_supervisory_chat(req.query)
-        return {"response": ans}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        return {"response": supervisor.query_supervisory_chat(req.query)}
+    except SecurityException as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @app.get("/api/audit/logs")
 def api_audit_logs():
-    return {"audit_trail": AuditLogger.get_trail(), "verified": AuditLogger.verify_integrity()}
+    return {
+        "audit_trail": AuditLogger.get_trail(),
+        "verified": AuditLogger.verify_integrity(),
+    }

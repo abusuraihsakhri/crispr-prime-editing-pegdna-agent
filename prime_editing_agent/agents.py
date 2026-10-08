@@ -1,66 +1,88 @@
 """
-Distributed Component Coordination & Executive Hierarchy for PrimeEditing-Designer: pegRNA Primer Binding & RT Template Agent.
-Domain: Genome Engineering
+Coordinator and worker wrappers for the lightweight deterministic rule engine.
 """
 import uuid
-from typing import Dict, Any, List, Optional
-from .models import FrontierPayload, AgentTelemetryAlert, ExecutionStatus
+from typing import Any, Dict, List
+
 from .engine import FrontierDomainEngine
+from .models import AgentTelemetryAlert, ExecutionStatus, FrontierPayload
 
 
 class PBSThermodynamicsAgent:
-    """Specialized Sub-Agent 1: Primary Parameter & Integrity Auditor."""
+    """Evaluate the package's primary numeric threshold."""
+
     def audit(self, payload: FrontierPayload) -> List[AgentTelemetryAlert]:
         alerts = []
-        res = FrontierDomainEngine.evaluate_primary_parameter(payload.primary_metric)
+        res = FrontierDomainEngine.evaluate_primary_parameter(
+            payload.primary_metric
+        )
         if res:
-            alerts.append(AgentTelemetryAlert(
-                alert_id=str(uuid.uuid4())[:8],
-                origin_agent="PBSThermodynamicsAgent",
-                status=ExecutionStatus.ELEVATED_RISK,
-                summary=res["summary"],
-                technical_details=res["details"],
-                actionable_remediation=res["remediation"],
-            ))
+            alerts.append(
+                AgentTelemetryAlert(
+                    alert_id=str(uuid.uuid4())[:8],
+                    origin_agent="PBSThermodynamicsAgent",
+                    status=ExecutionStatus.ELEVATED_RISK,
+                    summary=res["summary"],
+                    technical_details=res["details"],
+                    actionable_remediation=res["remediation"],
+                )
+            )
         return alerts
 
 
 class RTTemplateLengthAgent:
-    """Specialized Sub-Agent 2: Critical Kinetics & Security Safeguard."""
+    """Evaluate the package's secondary numeric threshold and critical flag."""
+
     def audit(self, payload: FrontierPayload) -> List[AgentTelemetryAlert]:
         alerts = []
-        res = FrontierDomainEngine.evaluate_secondary_kinetics(payload.secondary_metric, payload.is_critical_flag)
+        res = FrontierDomainEngine.evaluate_secondary_kinetics(
+            payload.secondary_metric,
+            payload.is_critical_flag,
+        )
         if res:
-            alerts.append(AgentTelemetryAlert(
-                alert_id=str(uuid.uuid4())[:8],
-                origin_agent="RTTemplateLengthAgent",
-                status=ExecutionStatus.CRITICAL_INTERVENTION if payload.is_critical_flag else ExecutionStatus.ELEVATED_RISK,
-                summary=res["summary"],
-                technical_details=res["details"],
-                actionable_remediation=res["remediation"],
-            ))
+            alerts.append(
+                AgentTelemetryAlert(
+                    alert_id=str(uuid.uuid4())[:8],
+                    origin_agent="RTTemplateLengthAgent",
+                    status=(
+                        ExecutionStatus.CRITICAL_INTERVENTION
+                        if payload.is_critical_flag
+                        else ExecutionStatus.ELEVATED_RISK
+                    ),
+                    summary=res["summary"],
+                    technical_details=res["details"],
+                    actionable_remediation=res["remediation"],
+                )
+            )
         return alerts
 
 
 class SecondaryFlapEquilibriumAgent:
-    """Specialized Sub-Agent 3: Protocol Conformance & Anomaly Triager."""
+    """Evaluate configured status-descriptor keywords."""
+
     def audit(self, payload: FrontierPayload) -> List[AgentTelemetryAlert]:
         alerts = []
-        res = FrontierDomainEngine.audit_specification_conformance(payload.status_descriptor, payload.attributes)
+        res = FrontierDomainEngine.audit_specification_conformance(
+            payload.status_descriptor,
+            payload.attributes,
+        )
         if res:
-            alerts.append(AgentTelemetryAlert(
-                alert_id=str(uuid.uuid4())[:8],
-                origin_agent="SecondaryFlapEquilibriumAgent",
-                status=ExecutionStatus.ELEVATED_RISK,
-                summary=res["summary"],
-                technical_details=res["details"],
-                actionable_remediation=res["remediation"],
-            ))
+            alerts.append(
+                AgentTelemetryAlert(
+                    alert_id=str(uuid.uuid4())[:8],
+                    origin_agent="SecondaryFlapEquilibriumAgent",
+                    status=ExecutionStatus.ELEVATED_RISK,
+                    summary=res["summary"],
+                    technical_details=res["details"],
+                    actionable_remediation=res["remediation"],
+                )
+            )
         return alerts
 
 
 class PrimeEditingCoordinator:
-    """Executive Coordinator & Air-Gapped Supervisory Intelligence."""
+    """Coordinate the three lightweight deterministic checks."""
+
     def __init__(self):
         self.sub_1 = PBSThermodynamicsAgent()
         self.sub_2 = RTTemplateLengthAgent()
@@ -73,8 +95,16 @@ class PrimeEditingCoordinator:
         all_alerts.extend(self.sub_2.audit(payload))
         all_alerts.extend(self.sub_3.audit(payload))
 
-        crit_count = sum(1 for a in all_alerts if a.status == ExecutionStatus.CRITICAL_INTERVENTION)
-        warn_count = sum(1 for a in all_alerts if a.status == ExecutionStatus.ELEVATED_RISK)
+        crit_count = sum(
+            1
+            for alert in all_alerts
+            if alert.status == ExecutionStatus.CRITICAL_INTERVENTION
+        )
+        warn_count = sum(
+            1
+            for alert in all_alerts
+            if alert.status == ExecutionStatus.ELEVATED_RISK
+        )
 
         if crit_count > 0:
             status = ExecutionStatus.CRITICAL_INTERVENTION
@@ -92,9 +122,12 @@ class PrimeEditingCoordinator:
             "total_alerts": len(all_alerts),
             "critical_count": crit_count,
             "warning_count": warn_count,
-            "alerts": [a.to_dict() for a in all_alerts],
-            "standard_specification": "Anzalone 2019 Prime Editing Architecture",
-            "consensus_summary": f"Consensus evaluation completed across 3 sub-agents with status [{status.value}].",
+            "alerts": [alert.to_dict() for alert in all_alerts],
+            "standard_specification": FrontierDomainEngine.STANDARD,
+            "consensus_summary": (
+                "Deterministic evaluation completed across three checks with "
+                f"status [{status.value}]."
+            ),
         }
 
         self.execution_ledger[payload.task_id] = dossier
@@ -103,8 +136,16 @@ class PrimeEditingCoordinator:
     def query_supervisory_chat(self, query: str) -> str:
         q = query.strip().lower()
         if "status" in q or "ledger" in q:
-            return f"PrimeEditing-Designer: pegRNA Primer Binding & RT Template Agent currently managing {len(self.execution_ledger)} execution tasks in air-gapped memory."
-        elif "standard" in q or "spec" in q:
-            return "Active runtime operating strictly according to Anzalone 2019 Prime Editing Architecture specifications."
-        else:
-            return f"PrimeEditing-Designer: pegRNA Primer Binding & RT Template Agent executive coordinator online. Zero-telemetry on-premises surveillance active."
+            return (
+                "Prime-editing rule evaluator currently holds "
+                f"{len(self.execution_ledger)} in-memory task results."
+            )
+        if "standard" in q or "spec" in q:
+            return (
+                "This package uses repository-defined specifications and "
+                "demonstration thresholds; they are not validated biological criteria."
+            )
+        return (
+            "Prime-editing rule evaluator is available for deterministic "
+            "repository-defined threshold checks."
+        )
