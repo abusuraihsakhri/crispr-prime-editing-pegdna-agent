@@ -3,7 +3,7 @@
   "info": {
     "title": "Crispr Prime Editing Pegdna Agent API",
     "description": "Deterministic rule-based evaluator for repository-defined prime-editing metrics. This API does not design pegRNA sequences or perform off-target analysis.",
-    "version": "3.0.0-ENTERPRISE",
+    "version": "3.0.0",
     "contact": {
       "name": "Dr. Abu Suraih Sakhri",
       "url": "https://github.com/abusuraihsakhri"
