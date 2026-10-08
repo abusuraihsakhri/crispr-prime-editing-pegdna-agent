@@ -13,6 +13,9 @@
   ];
 
   function requireFiniteNumber(value, label) {
+    if (String(value).trim() === "") {
+      throw new Error(`${label} is required.`);
+    }
     const parsed = Number(value);
     if (!Number.isFinite(parsed)) {
       throw new Error(`${label} must be a finite number.`);
