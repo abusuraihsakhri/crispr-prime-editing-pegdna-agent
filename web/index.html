@@ -1,360 +1,135 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta
-    http-equiv="Content-Security-Policy"
-    content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"
-  >
-  <meta
-    name="description"
-    content="Browser-only deterministic evaluator for repository-defined CRISPR prime-editing metrics."
-  >
-  <title>CRISPR Prime Editing pegRNA Agent</title>
-  <style>
-    :root {
-      color-scheme: dark;
-      --bg: #0a0f18;
-      --panel: #111827;
-      --panel-2: #0d1420;
-      --border: #293548;
-      --text: #f3f4f6;
-      --muted: #a7b0bf;
-      --accent: #7dd3fc;
-      --accent-strong: #38bdf8;
-      --ok: #86efac;
-      --warning: #fcd34d;
-      --danger: #fca5a5;
-      --focus: #bae6fd;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: var(--bg);
-      color: var(--text);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      line-height: 1.5;
-    }
-
-    a { color: var(--accent); }
-
-    .shell {
-      width: min(1180px, calc(100% - 2rem));
-      margin: 0 auto;
-      padding: 2rem 0 3rem;
-    }
-
-    .hero {
-      display: flex;
-      justify-content: space-between;
-      gap: 1.5rem;
-      align-items: flex-start;
-      padding-bottom: 1.5rem;
-      border-bottom: 1px solid var(--border);
-    }
-
-    h1, h2, p { margin-top: 0; }
-
-    h1 {
-      margin-bottom: 0.4rem;
-      font-size: clamp(1.65rem, 3vw, 2.35rem);
-      line-height: 1.15;
-    }
-
-    .subtitle {
-      max-width: 760px;
-      margin-bottom: 0;
-      color: var(--muted);
-    }
-
-    .mode-badge {
-      flex: 0 0 auto;
-      padding: 0.35rem 0.75rem;
-      border: 1px solid #166534;
-      border-radius: 999px;
-      background: #052e16;
-      color: var(--ok);
-      font-size: 0.8rem;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
-    .notice {
-      margin: 1.25rem 0;
-      padding: 0.95rem 1rem;
-      border: 1px solid #854d0e;
-      border-radius: 10px;
-      background: #271a05;
-      color: #fde68a;
-      font-size: 0.92rem;
-    }
-
-    .metrics {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 0.8rem;
-      margin-bottom: 1.25rem;
-    }
-
-    .metric {
-      padding: 0.9rem 1rem;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      background: var(--panel);
-    }
-
-    .metric-label {
-      color: var(--muted);
-      font-size: 0.74rem;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-    }
-
-    .metric-value {
-      margin-top: 0.15rem;
-      font-size: 1.2rem;
-      font-weight: 750;
-      overflow-wrap: anywhere;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-      gap: 1rem;
-    }
-
-    .card {
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--panel);
-      padding: 1.25rem;
-    }
-
-    .card h2 {
-      margin-bottom: 1rem;
-      font-size: 1.05rem;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.9rem;
-    }
-
-    .field.full { grid-column: 1 / -1; }
-
-    label {
-      display: block;
-      margin-bottom: 0.35rem;
-      color: var(--muted);
-      font-size: 0.82rem;
-      font-weight: 650;
-    }
-
-    input {
-      width: 100%;
-      min-height: 42px;
-      padding: 0.6rem 0.7rem;
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      background: var(--panel-2);
-      color: var(--text);
-      font: inherit;
-    }
-
-    input[type="checkbox"] {
-      width: auto;
-      min-height: auto;
-      margin-right: 0.45rem;
-    }
-
-    input:focus-visible,
-    button:focus-visible,
-    a:focus-visible {
-      outline: 3px solid var(--focus);
-      outline-offset: 2px;
-    }
-
-    .checkbox-row {
-      display: flex;
-      align-items: center;
-      min-height: 42px;
-      padding-top: 1.25rem;
-    }
-
-    .checkbox-row label {
-      margin: 0;
-      color: var(--text);
-      font-weight: 500;
-    }
-
-    button {
-      width: 100%;
-      margin-top: 1rem;
-      min-height: 44px;
-      border: 0;
-      border-radius: 8px;
-      background: var(--accent-strong);
-      color: #082f49;
-      font: inherit;
-      font-weight: 800;
-      cursor: pointer;
-    }
-
-    button:hover { filter: brightness(1.08); }
-
-    .rules {
-      margin: 0 0 1rem;
-      padding-left: 1.15rem;
-      color: var(--muted);
-      font-size: 0.88rem;
-    }
-
-    pre {
-      min-height: 360px;
-      max-height: 560px;
-      margin: 0;
-      overflow: auto;
-      padding: 1rem;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: #060a11;
-      color: #d1fae5;
-      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-      font-size: 0.82rem;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-
-    .footer {
-      margin-top: 1.25rem;
-      color: var(--muted);
-      font-size: 0.82rem;
-    }
-
-    @media (max-width: 800px) {
-      .hero { display: block; }
-      .mode-badge { display: inline-block; margin-top: 1rem; }
-      .metrics { grid-template-columns: 1fr 1fr; }
-      .grid { grid-template-columns: 1fr; }
-    }
-
-    @media (max-width: 520px) {
-      .shell { width: min(100% - 1rem, 1180px); padding-top: 1rem; }
-      .metrics, .form-grid { grid-template-columns: 1fr; }
-      .field.full { grid-column: auto; }
-      .checkbox-row { padding-top: 0; }
-    }
-  </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101e33">
+  <meta name="description" content="Local, deterministic prime-editing rule evaluation workbench.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'none'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Prime Editing Workbench — Rule Evaluation</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./app.js" defer></script>
 </head>
 <body>
-  <main class="shell">
-    <header class="hero">
-      <div>
-        <h1>CRISPR Prime Editing pegRNA Agent</h1>
-        <p class="subtitle">
-          Static browser interface for the repository's deterministic threshold rules.
-          No data is uploaded and no backend API is required.
-        </p>
+  <div class="app">
+    <aside class="sidebar" aria-label="Application information">
+      <a class="brand" href="./" aria-label="Prime Editing Workbench home">
+        <span class="brand-mark" aria-hidden="true">PE</span>
+        <span>PRIME EDITING <small>WORKBENCH</small></span>
+      </a>
+      <div class="sidebar-divider"></div>
+      <div class="nav-label">WORKSPACE</div>
+      <div class="nav-current"><span class="nav-dot"></span> Rule evaluation</div>
+      <div class="nav-label second">REFERENCE</div>
+      <a class="nav-link" href="#rules">Rule definitions <span aria-hidden="true">↗</span></a>
+      <a class="nav-link" href="#about">Method &amp; limitations <span aria-hidden="true">↗</span></a>
+      <div class="sidebar-bottom">
+        <div class="privacy-icon" aria-hidden="true">◎</div>
+        <strong>Local processing</strong>
+        <p>All evaluations run in your browser. No data is transmitted or stored.</p>
+        <a href="https://github.com/abusuraihsakhri/crispr-prime-editing-pegdna-agent" target="_blank" rel="noopener noreferrer">View source code ↗</a>
       </div>
-      <span class="mode-badge">Browser-only mode</span>
-    </header>
-
-    <div class="notice" role="note">
-      These rules are software demonstration thresholds, not validated pegRNA design criteria.
-      This interface does not design sequences, calculate off-target effects, or provide experimental
-      or clinical recommendations.
-    </div>
-
-    <section class="metrics" aria-label="Session metrics">
-      <div class="metric">
-        <div class="metric-label">Processing</div>
-        <div class="metric-value">Local only</div>
-      </div>
-      <div class="metric">
-        <div class="metric-label">Evaluations</div>
-        <div class="metric-value" id="metric-evaluations">0</div>
-      </div>
-      <div class="metric">
-        <div class="metric-label">Last status</div>
-        <div class="metric-value" id="metric-status">Not run</div>
-      </div>
-      <div class="metric">
-        <div class="metric-label">Last alerts</div>
-        <div class="metric-value" id="metric-alerts">0</div>
-      </div>
-    </section>
-
-    <div class="grid">
-      <section class="card" aria-labelledby="input-heading">
-        <h2 id="input-heading">Evaluate a metric set</h2>
-        <form id="audit-form" novalidate>
-          <div class="form-grid">
-            <div class="field">
-              <label for="task_id">Task ID</label>
-              <input id="task_id" name="task_id" type="text" value="TASK-DEMO-001" maxlength="120" required>
-            </div>
-
-            <div class="field">
-              <label for="target_id">Target identifier</label>
-              <input id="target_id" name="target_id" type="text" value="TARGET-01" maxlength="120" required>
-            </div>
-
-            <div class="field">
-              <label for="primary_metric">Primary metric</label>
-              <input id="primary_metric" name="primary_metric" type="number" value="29.4" step="0.1" required>
-            </div>
-
-            <div class="field">
-              <label for="secondary_metric">Secondary metric</label>
-              <input id="secondary_metric" name="secondary_metric" type="number" value="14.8" step="0.1" required>
-            </div>
-
-            <div class="field full">
-              <label for="status_descriptor">Status descriptor</label>
-              <input
-                id="status_descriptor"
-                name="status_descriptor"
-                type="text"
-                value="DISCORDANT_ANOMALY"
-                maxlength="160"
-              >
-            </div>
-
-            <div class="field full checkbox-row">
-              <label for="is_critical">
-                <input id="is_critical" name="is_critical" type="checkbox">
-                Set critical flag
-              </label>
-            </div>
+    </aside>
+    <div class="main-column">
+      <header class="topbar">
+        <span>RESEARCH UTILITIES <span class="crumb">/</span> PRIME EDITING <span class="crumb">/</span> RULE EVALUATION</span>
+        <span class="topbar-mode"><span class="online-dot"></span> Browser-only · no API</span>
+      </header>
+      <main class="content">
+        <div class="eyebrow"><span class="eyebrow-line"></span> DETERMINISTIC ANALYSIS</div>
+        <div class="page-heading">
+          <div>
+            <h1>Prime editing rule evaluator<span class="heading-dot">.</span></h1>
+            <p>Assess numeric inputs and status descriptors against the repository's configured decision rules.</p>
           </div>
+          <div class="version">RULESET <strong>01 / CORE</strong></div>
+        </div>
 
-          <button type="submit">Run local evaluation</button>
-        </form>
-      </section>
+        <section class="scope" id="about" aria-label="Scientific scope">
+          <span class="scope-symbol" aria-hidden="true">i</span>
+          <div><strong>Demonstration rules, not biological predictions.</strong> This workbench does not design pegRNAs, calculate PBS thermodynamics, assess off-target effects, or predict experimental editing efficiency. Thresholds are arbitrary software constants and should not guide experiments or clinical decisions.</div>
+        </section>
 
-      <section class="card" aria-labelledby="result-heading">
-        <h2 id="result-heading">Evaluation result</h2>
-        <ul class="rules">
-          <li>Primary metric &gt; 25: elevated alert.</li>
-          <li>Secondary metric &gt; 12: elevated alert; critical flag: critical alert.</li>
-          <li>Configured discordance keywords: elevated conformance alert.</li>
-        </ul>
-        <pre id="output" aria-live="polite">Ready. Submit the form to evaluate the repository-defined rules.</pre>
-      </section>
+        <div class="workflow-layout">
+          <section class="panel input-panel" aria-labelledby="inputs-title">
+            <div class="panel-top">
+              <div class="section-index">01</div>
+              <div><h2 id="inputs-title">Input parameters</h2><p>Configure a single evaluation</p></div>
+            </div>
+            <div class="preset-line">
+              <span>LOAD EXAMPLE</span>
+              <div class="preset-options">
+                <button type="button" class="preset active" data-preset="nominal" aria-pressed="true">Nominal</button>
+                <button type="button" class="preset" data-preset="elevated" aria-pressed="false">Elevated</button>
+                <button type="button" class="preset" data-preset="critical" aria-pressed="false">Critical</button>
+              </div>
+            </div>
+            <form id="audit-form" novalidate>
+              <div class="group-title"><span>IDENTIFIERS</span><span class="fine-line"></span></div>
+              <div class="field-row">
+                <div class="field"><label for="task_id">Task ID</label><input id="task_id" name="task_id" maxlength="120" required value="TASK-DEMO-001" autocomplete="off"></div>
+                <div class="field"><label for="target_id">Target identifier</label><input id="target_id" name="target_id" maxlength="120" required value="TARGET-01" autocomplete="off"></div>
+              </div>
+              <div class="group-title"><span>MEASUREMENTS</span><span class="fine-line"></span></div>
+              <div class="field-row">
+                <div class="field"><label for="primary_metric">Primary metric <span class="hint">threshold &gt;25</span></label><input id="primary_metric" name="primary_metric" type="number" step="any" required value="14.5" inputmode="decimal"></div>
+                <div class="field"><label for="secondary_metric">Secondary metric <span class="hint">threshold &gt;12</span></label><input id="secondary_metric" name="secondary_metric" type="number" step="any" required value="3.2" inputmode="decimal"></div>
+              </div>
+              <div class="field"><label for="status_descriptor">Status descriptor</label><input id="status_descriptor" name="status_descriptor" maxlength="160" value="NOMINAL" autocomplete="off"><span class="field-help">Flags: DISCORDANT, ANOMALY, MUTANT, VIOLATION, FAIL, REJECT</span></div>
+              <label class="toggle-row" for="is_critical">
+                <span><strong>Critical override</strong><small>Force the critical classification regardless of numeric inputs</small></span>
+                <input type="checkbox" id="is_critical" name="is_critical"><span class="switch" aria-hidden="true"></span>
+              </label>
+              <div class="form-error" id="form-error" role="alert" hidden></div>
+              <button class="evaluate" type="submit">Run evaluation <span aria-hidden="true">→</span></button>
+              <p class="form-footnote">No server connection · Results remain in this session</p>
+            </form>
+          </section>
+
+          <section class="panel result-panel" id="results" aria-labelledby="results-title">
+            <div class="panel-top">
+              <div class="section-index">02</div>
+              <div><h2 id="results-title">Evaluation results</h2><p>Rule-based classification &amp; triggered conditions</p></div>
+              <div class="run-count" id="run-count">0 runs</div>
+            </div>
+            <div id="empty-state" class="empty-state">
+              <div class="empty-visual" aria-hidden="true"><span class="empty-circle"><span>↗</span></span></div>
+              <h3>Ready to evaluate</h3>
+              <p>Choose an example or enter your own metrics, then select <strong>Run evaluation</strong>.</p>
+            </div>
+            <div id="results-content" hidden aria-live="polite">
+              <div class="outcome-card">
+                <div class="outcome-label">OVERALL CLASSIFICATION</div>
+                <div class="outcome-line"><span id="status-indicator" class="status-indicator"></span><strong id="result-status">—</strong></div>
+                <p id="result-description"></p>
+                <div class="outcome-meta"><span>INTEGRITY STATUS</span><strong id="result-integrity">—</strong></div>
+              </div>
+              <div class="result-stat-grid">
+                <div><span>RULES TRIGGERED</span><strong id="result-alert-count">0</strong></div>
+                <div><span>CRITICAL CONDITIONS</span><strong id="result-critical-count">0</strong></div>
+              </div>
+              <div class="alerts-heading"><h3>Rule findings</h3><span id="alert-summary">—</span></div>
+              <div id="alert-cards" class="alert-list"></div>
+              <div class="result-actions">
+                <button id="copy-json" type="button" class="secondary-action">Copy JSON</button>
+                <button id="download-json" type="button" class="secondary-action">Download JSON ↓</button>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <section class="reference-panel" id="rules" aria-labelledby="rules-title">
+          <div class="reference-header"><div><div class="eyebrow tiny">TRANSPARENT LOGIC</div><h2 id="rules-title">Decision rules</h2></div><span>Fixed in the source code</span></div>
+          <div class="rule-grid">
+            <div class="rule"><div class="rule-num">RULE 01</div><strong>Primary threshold</strong><p>Primary metric exceeds 25.0</p><span class="severity elevated">ELEVATED</span></div>
+            <div class="rule"><div class="rule-num">RULE 02</div><strong>Secondary threshold</strong><p>Secondary metric exceeds 12.0</p><span class="severity elevated">ELEVATED</span></div>
+            <div class="rule"><div class="rule-num">RULE 03</div><strong>Critical override</strong><p>Explicit critical flag is enabled</p><span class="severity critical">CRITICAL</span></div>
+            <div class="rule"><div class="rule-num">RULE 04</div><strong>Descriptor keywords</strong><p>Status text includes a flagged keyword</p><span class="severity elevated">ELEVATED</span></div>
+          </div>
+        </section>
+        <footer>PRIME EDITING WORKBENCH <span>Research demonstration · Not validated for experimental or clinical use · MIT License</span></footer>
+      </main>
     </div>
-
-    <p class="footer">
-      The browser build intentionally omits the server-side HMAC audit trail because embedding an
-      audit secret in a public static site would be insecure. Use the Python API/CLI for HMAC-backed
-      audit records.
-    </p>
-  </main>
-
-  <script src="./app.js"></script>
+  </div>
 </body>
 </html>
