@@ -1,178 +1,191 @@
 # CRISPR Prime Editing pegRNA Agent
 
-> **Domain:** Computational Biology & AI Drug Discovery
-> **Reference Standards:** wwPDB, IUPAC & CLSI Computational Guidelines
+### [Open the Live Application →](https://abusuraihsakhri.github.io/crispr-prime-editing-pegdna-agent/)
 
-<div align="center">
+A small Python and browser toolkit for applying deterministic, repository-defined threshold rules to prime-editing-related numeric inputs and status descriptors.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-3776AB.svg?logo=python&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688.svg?logo=fastapi&logoColor=white)
-![Audit Trail](https://img.shields.io/badge/Audit-HMAC--SHA256_Tamper--Evident-brightgreen.svg)
-![Zero-PHI Guard](https://img.shields.io/badge/Guard-Zero--PHI_Outbound-blue.svg)
-![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)
+> **Scope:** the current source code is a rule-based evaluator. It does **not** design pegRNA sequences, derive PBS thermodynamics from nucleotide sequences, perform off-target analysis, predict editing efficiency, or implement a validated experimental/clinical decision rule. The numeric thresholds are software demonstration constants and should not be treated as biological recommendations.
 
-</div>
+## Features
 
----
+- Deterministic evaluation of primary and secondary numeric metrics.
+- Status-keyword checks for configured discordance/anomaly terms.
+- Single-record and CSV batch CLI workflows.
+- FastAPI endpoints for health, evaluation, chat-style mock responses, and audit metadata.
+- In-memory HMAC-SHA256 audit chaining for the audited Python workflow.
+- Pattern-based outbound identifier guard for several common identifier formats.
+- Static GitHub Pages interface that runs entirely in the browser with no backend request.
+- Docker image and Compose configuration.
+- Pytest regression tests, lightweight Ruff checks, dependency auditing, and container smoke tests in GitHub Actions.
 
-## Overview
+## Live application
 
-CRISPR Prime Editing pegRNA Agent is a computational platform for evaluating and optimizing prime editing guide RNA (pegRNA) designs. It provides deterministic calculation engines for PBS thermodynamics, RT template length optimization, and protocol conformance checking.
+The GitHub Pages application evaluates the same **root worker thresholds** used by the audited Python workflow:
 
----
+- primary metric > 25 → elevated alert;
+- secondary metric > 12 → elevated alert;
+- critical flag → critical alert;
+- configured discordance/anomaly keywords → elevated conformance alert.
 
-## Key Capabilities
+The browser build intentionally does not implement HMAC signing. A public static page cannot safely contain the secret required for HMAC authentication. Browser inputs remain local to the page; the shipped JavaScript makes no network requests.
 
-- **Deterministic Calculation Engine**: Evaluates primary and secondary metrics against reference thresholds for pegRNA design quality.
-- **Risk & Urgency Classification**: Multi-tier categorization (ROUTINE, ELEVATED, CRITICAL_STAT) with automated action recommendations.
-- **Multi-Agent Architecture**: Specialized workers for QC invariant checking, safety escalation, and protocol conformance.
-- **Zero-PHI Outbound Guard**: AST and regex inspection blocking SSNs, MRNs, phone numbers, and patient identifiers.
-- **Tamper-Evident HMAC-SHA256 Audit Trail**: Chained, cryptographically signed logs for every evaluation.
-
----
+Python-in-the-browser is not used. The browser workflow is simple deterministic logic, so Pyodide/PyScript would add substantial WebAssembly download and startup overhead without providing useful functionality.
 
 ## Installation
 
+Python 3.9 or newer is supported.
+
 ```bash
-# Clone the repository
 git clone https://github.com/abusuraihsakhri/crispr-prime-editing-pegdna-agent.git
 cd crispr-prime-editing-pegdna-agent
 
-# Install dependencies
-pip install fastapi uvicorn pydantic pytest
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
 
-# Set required environment variable
-export AUDIT_SECRET_KEY="your-secure-audit-key-min-16-chars"
+python -m pip install --upgrade pip
+python -m pip install -e ".[api,test]"
 ```
 
----
+The audited root CLI/API requires an HMAC secret:
+
+```bash
+export AUDIT_SECRET_KEY="replace-with-a-random-secret-at-least-16-characters"
+```
+
+Do not commit real secrets. `.env` and common local environment variants are ignored by Git.
 
 ## Usage
 
-### CLI Commands
+### Audited root CLI
 
-#### 1. Single Task Evaluation (Audit)
+Single evaluation:
+
 ```bash
-python cli.py audit --task-id TASK-001 --target TARGET-01 --primary 28.5 --secondary 14.2 --critical --status DISCORDANT
+python cli.py audit \
+  --task-id TASK-001 \
+  --target TARGET-01 \
+  --primary 28.5 \
+  --secondary 14.2 \
+  --status DISCORDANT
 ```
 
-#### 2. Supervisory Chat Query
-```bash
-python cli.py chat "What is the system status?"
-```
+Batch CSV:
 
-#### 3. Batch CSV Processing
 ```bash
 python cli.py batch -i sample.csv -o results.csv
 ```
 
-#### 4. Verify Audit Trail Integrity
+Verify the current in-memory HMAC chain:
+
 ```bash
 python cli.py verify-audit
 ```
 
-#### 5. Launch REST API Server
+Start the root FastAPI service:
+
 ```bash
 python cli.py serve --host 127.0.0.1 --port 8000
 ```
 
-### Parameter Reference
+### Lightweight packaged CLI
 
-| Parameter | Type | Default | Description |
-|:----------|:-----|:--------|:------------|
-| `--task-id` | str | TASK-2026-001 | Unique task/case identifier |
-| `--target` | str | KEY-TARGET-01 | Genomic target or specimen identifier |
-| `--primary` | float | 28.5 | Primary measurement (e.g., PBS Tm in °C) |
-| `--secondary` | float | 14.2 | Secondary metric (e.g., RT template length) |
-| `--critical` | flag | False | Emergency escalation flag |
-| `--status` | str | DISCORDANT | Status/phenotype descriptor |
-
-### Input Data Schema (CSV/JSON)
-
-| Field | Type | Required | Description |
-|:------|:-----|:---------|:------------|
-| `task_id` | str | Yes | Unique task identifier |
-| `target_identifier` | str | Yes | Target or specimen key |
-| `primary_metric` | float | Yes | Primary measurement value |
-| `secondary_metric` | float | No | Secondary measurement value |
-| `is_critical_flag` | bool | No | Emergency escalation flag |
-| `status_descriptor` | str | No | Status code (NOMINAL, DISCORDANT, ANOMALY, etc.) |
-
----
-
-## REST API Endpoints
-
-| Method | Endpoint | Description |
-|:-------|:---------|:------------|
-| GET | `/health` | Service health check |
-| GET | `/metrics` | Operational metrics |
-| POST | `/api/audit` | Submit task for evaluation |
-| POST | `/api/chat` | Supervisory chat query |
-| GET | `/api/audit/logs` | Retrieve and verify audit trail |
-
----
-
-## Testing
+The installed console command uses the `prime_editing_agent` package:
 
 ```bash
-# Set test environment variable
-export AUDIT_SECRET_KEY="test-audit-secret-key-2026-secure"
-
-# Run full test suite
-pytest -v
-
-# Run simulation benchmark
-python simulator.py 1000
+crispr-prime-editing-pegdna-engine audit
+crispr-prime-editing-pegdna-engine batch -i sample.csv -o results.csv
+crispr-prime-editing-pegdna-engine serve
 ```
 
----
+The repository contains both the audited `agents/` workflow and the lighter `prime_editing_agent/` workflow. They are retained for compatibility and have separate status models.
 
-## Security
+## CSV input
 
-- **AUDIT_SECRET_KEY**: Required environment variable (minimum 16 characters). Never hardcode secrets.
-- **Zero-PHI Guard**: Automatically blocks outbound data containing SSNs, MRNs, emails, phone numbers, and patient names.
-- **HMAC-SHA256 Audit Trail**: Each entry is cryptographically signed and chained to detect tampering.
+Expected columns:
 
----
+| Column | Required | Meaning |
+| --- | --- | --- |
+| `task_id` | No | Task identifier; a default is used if blank |
+| `target_identifier` | No | Non-secret target identifier |
+| `primary_metric` | No | Finite numeric primary value |
+| `secondary_metric` | No | Finite numeric secondary value |
+| `is_critical_flag` | No | `true/false`, `yes/no`, `on/off`, or `1/0` |
+| `status_descriptor` | No | Free-text status descriptor |
 
-## Docker Deployment
+Invalid non-finite numbers or unrecognized boolean strings are rejected instead of being silently coerced.
+
+## REST API
+
+The audited root API exposes:
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| GET | `/health` | Service status |
+| GET | `/metrics` | In-memory process counters |
+| POST | `/api/audit` | Evaluate a task and create an HMAC-linked audit record |
+| POST | `/api/chat` | Deterministic mock supervisory response |
+| GET | `/api/audit/logs` | Return audit metadata and integrity status |
+
+FastAPI also serves the generated OpenAPI schema at `/openapi.json`.
+
+## Privacy and security notes
+
+- The identifier guard is a regex-based safety filter, not a HIPAA de-identification guarantee.
+- The HMAC audit trail is in memory only; it is lost when the process exits.
+- HMAC integrity detects mutation of entries within the current process state; it is not a durable append-only ledger.
+- The repository does not require external model/API credentials for its current deterministic workflows.
+- The static browser application has a restrictive Content Security Policy and does not make network requests.
+- GitHub Actions are pinned to immutable commit SHAs.
+
+## Testing and checks
+
+Install development tooling:
 
 ```bash
-# Create .env file with required variables
-echo "AUDIT_SECRET_KEY=your-production-audit-key-here" > .env
-
-# Build and run
-docker-compose up --build
+python -m pip install -e ".[api,test,dev]"
 ```
 
----
+Run the same core checks used by CI:
 
-## Project Structure
-
+```bash
+python -m pip check
+ruff check --select E9,F63,F7,F82 .
+python -m compileall -q agents prime_editing_agent cli.py enrichment.py simulator.py
+node --check web/app.js
+pytest -q
+pip-audit
 ```
-crispr-prime-editing-pegdna-agent/
-├── agents/                    # Core multi-agent system
-│   ├── base.py               # Security, PHI guard, audit trail
-│   ├── models.py             # Pydantic data models
-│   ├── supervisor.py         # Orchestrator
-│   ├── workers.py            # Specialized evaluation workers
-│   ├── api.py                # FastAPI REST server
-│   ├── metrics.py            # Prometheus metrics
-│   ├── learning.py           # Bayesian calibration engine
-│   ├── llm_factory.py        # LLM provider factory
-│   └── streamer.py           # WebSocket telemetry
-├── prime_editing_agent/       # Domain-specific engine
-│   ├── engine.py             # Core algorithmic engine
-│   ├── agents.py             # PBS, RT, Flap agents
-│   ├── cli.py                # Domain CLI
-│   └── server.py             # Domain REST server
-├── tests/                     # Test suite
-├── cli.py                     # Main CLI entry point
-├── simulator.py               # High-throughput simulation
-├── enrichment.py              # Enrichment feature suite
-├── web/index.html             # Operations console
+
+## Docker
+
+Create a local `.env` from `.env.example`, set a real secret, then run:
+
+```bash
+docker compose up --build
+```
+
+The container runs as a non-root user and exposes the API on port 8000.
+
+## Project layout
+
+```text
+.
+├── agents/                    # Audited multi-worker Python workflow
+├── prime_editing_agent/       # Lightweight domain-specific package
+├── tests/                     # Regression and API tests
+├── web/                       # Static GitHub Pages application
+├── cli.py                     # Audited root CLI
+├── enrichment.py              # Generic enrichment scaffolding retained for compatibility
+├── simulator.py               # Local stress/simulation utility
 ├── Dockerfile
 ├── docker-compose.yml
 └── pyproject.toml
 ```
+
+## Browser compatibility
+
+The static application uses standard HTML, CSS, and modern JavaScript without a framework. Current versions of Chrome, Edge, Firefox, and Safari are expected to work. No browser storage is required.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
