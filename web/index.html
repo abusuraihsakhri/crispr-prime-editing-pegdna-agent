@@ -11,50 +11,21 @@
   <script src="./app.js" defer></script>
 </head>
 <body>
-  <div class="app">
-    <aside class="sidebar" aria-label="Application information">
-      <a class="brand" href="./" aria-label="Prime Editing Workbench home">
-        <span class="brand-mark" aria-hidden="true">PE</span>
-        <span>PRIME EDITING <small>WORKBENCH</small></span>
-      </a>
-      <div class="sidebar-divider"></div>
-      <div class="nav-label">WORKSPACE</div>
-      <div class="nav-current"><span class="nav-dot"></span> Rule evaluation</div>
-      <div class="nav-label second">REFERENCE</div>
-      <a class="nav-link" href="#rules">Rule definitions <span aria-hidden="true">↗</span></a>
-      <a class="nav-link" href="#about">Method &amp; limitations <span aria-hidden="true">↗</span></a>
-      <div class="sidebar-bottom">
-        <div class="privacy-icon" aria-hidden="true">◎</div>
-        <strong>Local processing</strong>
-        <p>All evaluations run in your browser. No data is transmitted or stored.</p>
-        <a href="https://github.com/abusuraihsakhri/crispr-prime-editing-pegdna-agent" target="_blank" rel="noopener noreferrer">View source code ↗</a>
+  <main class="compact-app">
+    <header class="compact-header">
+      <div class="identity"><span class="identity-mark">PE</span><span><strong>Prime editing</strong><small>RULE EVALUATOR</small></span></div>
+      <div class="header-actions"><span class="local-label">● LOCAL · NO API</span><a href="https://github.com/abusuraihsakhri/crispr-prime-editing-pegdna-agent" target="_blank" rel="noopener noreferrer">GitHub ↗</a></div>
+    </header>
+    <div class="workspace">
+      <div class="compact-intro">
+        <div><h1>Rule evaluation <span>workbench</span></h1><p>Enter metrics, evaluate, and review the triggered rules in one view.</p></div>
+        <span class="disclaimer" id="about"><strong>Demonstration only.</strong> Fixed thresholds are not validated biological predictions or experimental guidance.</span>
       </div>
-    </aside>
-    <div class="main-column">
-      <header class="topbar">
-        <span>RESEARCH UTILITIES <span class="crumb">/</span> PRIME EDITING <span class="crumb">/</span> RULE EVALUATION</span>
-        <span class="topbar-mode"><span class="online-dot"></span> Browser-only · no API</span>
-      </header>
-      <main class="content">
-        <div class="eyebrow"><span class="eyebrow-line"></span> DETERMINISTIC ANALYSIS</div>
-        <div class="page-heading">
-          <div>
-            <h1>Prime editing rule evaluator<span class="heading-dot">.</span></h1>
-            <p>Assess numeric inputs and status descriptors against the repository's configured decision rules.</p>
-          </div>
-          <div class="version">RULESET <strong>01 / CORE</strong></div>
-        </div>
-
-        <section class="scope" id="about" aria-label="Scientific scope">
-          <span class="scope-symbol" aria-hidden="true">i</span>
-          <div><strong>Demonstration rules, not biological predictions.</strong> This workbench does not design pegRNAs, calculate PBS thermodynamics, assess off-target effects, or predict experimental editing efficiency. Thresholds are arbitrary software constants and should not guide experiments or clinical decisions.</div>
-        </section>
-
-        <div class="workflow-layout">
+      <div class="workflow-layout">
           <section class="panel input-panel" aria-labelledby="inputs-title">
             <div class="panel-top">
               <div class="section-index">01</div>
-              <div><h2 id="inputs-title">Input parameters</h2><p>Configure a single evaluation</p></div>
+              <div><h2 id="inputs-title">Input parameters</h2></div>
             </div>
             <div class="preset-line">
               <span>LOAD EXAMPLE</span>
@@ -65,12 +36,12 @@
               </div>
             </div>
             <form id="audit-form" novalidate>
-              <div class="group-title"><span>IDENTIFIERS</span><span class="fine-line"></span></div>
+              
               <div class="field-row">
                 <div class="field"><label for="task_id">Task ID</label><input id="task_id" name="task_id" maxlength="120" required value="TASK-DEMO-001" autocomplete="off"></div>
                 <div class="field"><label for="target_id">Target identifier</label><input id="target_id" name="target_id" maxlength="120" required value="TARGET-01" autocomplete="off"></div>
               </div>
-              <div class="group-title"><span>MEASUREMENTS</span><span class="fine-line"></span></div>
+              
               <div class="field-row">
                 <div class="field"><label for="primary_metric">Primary metric <span class="hint">threshold &gt;25</span></label><input id="primary_metric" name="primary_metric" type="number" step="any" required value="14.5" inputmode="decimal"></div>
                 <div class="field"><label for="secondary_metric">Secondary metric <span class="hint">threshold &gt;12</span></label><input id="secondary_metric" name="secondary_metric" type="number" step="any" required value="3.2" inputmode="decimal"></div>
@@ -82,20 +53,20 @@
               </label>
               <div class="form-error" id="form-error" role="alert" hidden></div>
               <button class="evaluate" type="submit">Run evaluation <span aria-hidden="true">→</span></button>
-              <p class="form-footnote">No server connection · Results remain in this session</p>
+              
             </form>
           </section>
 
           <section class="panel result-panel" id="results" aria-labelledby="results-title">
             <div class="panel-top">
               <div class="section-index">02</div>
-              <div><h2 id="results-title">Evaluation results</h2><p>Rule-based classification &amp; triggered conditions</p></div>
+              <div><h2 id="results-title">Evaluation results</h2></div>
               <div class="run-count" id="run-count">0 runs</div>
             </div>
             <div id="empty-state" class="empty-state">
-              <div class="empty-visual" aria-hidden="true"><span class="empty-circle"><span>↗</span></span></div>
+              
               <h3>Ready to evaluate</h3>
-              <p>Choose an example or enter your own metrics, then select <strong>Run evaluation</strong>.</p>
+              <p>Set inputs at left and press <strong>Run evaluation</strong>.</p>
             </div>
             <div id="results-content" hidden aria-live="polite">
               <div class="outcome-card">
@@ -118,18 +89,8 @@
           </section>
         </div>
 
-        <section class="reference-panel" id="rules" aria-labelledby="rules-title">
-          <div class="reference-header"><div><div class="eyebrow tiny">TRANSPARENT LOGIC</div><h2 id="rules-title">Decision rules</h2></div><span>Fixed in the source code</span></div>
-          <div class="rule-grid">
-            <div class="rule"><div class="rule-num">RULE 01</div><strong>Primary threshold</strong><p>Primary metric exceeds 25.0</p><span class="severity elevated">ELEVATED</span></div>
-            <div class="rule"><div class="rule-num">RULE 02</div><strong>Secondary threshold</strong><p>Secondary metric exceeds 12.0</p><span class="severity elevated">ELEVATED</span></div>
-            <div class="rule"><div class="rule-num">RULE 03</div><strong>Critical override</strong><p>Explicit critical flag is enabled</p><span class="severity critical">CRITICAL</span></div>
-            <div class="rule"><div class="rule-num">RULE 04</div><strong>Descriptor keywords</strong><p>Status text includes a flagged keyword</p><span class="severity elevated">ELEVATED</span></div>
-          </div>
-        </section>
-        <footer>PRIME EDITING WORKBENCH <span>Research demonstration · Not validated for experimental or clinical use · MIT License</span></footer>
-      </main>
+      <div class="bottom-note" id="rules">RULES: Primary &gt;25 · Secondary &gt;12 · Critical override · Status keywords <span>Browser-only · No data sent or stored · <a href="https://github.com/abusuraihsakhri/crispr-prime-editing-pegdna-agent#live-application" target="_blank" rel="noopener noreferrer">Details ↗</a></span></div>
     </div>
-  </div>
+  </main>
 </body>
 </html>
