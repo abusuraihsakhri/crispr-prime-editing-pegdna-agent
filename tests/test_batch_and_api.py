@@ -1,6 +1,9 @@
 import csv
 import os
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 os.environ.setdefault("AUDIT_SECRET_KEY", "test-audit-secret-key-2026-secure")
 
