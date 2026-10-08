@@ -39,9 +39,11 @@ jobs:
       - name: Compile Python sources
         run: python -m compileall -q agents prime_editing_agent cli.py enrichment.py simulator.py
 
-      - name: Check browser JavaScript syntax
+      - name: Check browser JavaScript
         if: matrix.python-version == '3.12'
-        run: node --check web/app.js
+        run: |
+          node --check web/app.js
+          node tests/web_smoke.js
 
       - name: Run test suite
         env:
