@@ -1,7 +1,3 @@
-"""
-Crispr Prime Editing Pegdna Agent — Enterprise Automated Analytical Suite.
-Domain: AI Drug Discovery, Structural Biology & Wet-Lab Robotics
-Standard: wwPDB / IUPAC / OpenSMILES / ISAC Standards
+"""Audited deterministic rule workflow for the CRISPR prime-editing repository."""
 
-"""
-__version__ = "3.0.0-ENTERPRISE"
+__version__ = "3.0.0"
