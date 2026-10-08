@@ -1,5 +1,5 @@
 """
-Inference Engine supporting local Ollama, Claude, OpenAI, and deterministic Mock with Zero-PHI checks.
+Deterministic mock response provider with outbound identifier checks.
 """
 from .base import PHIGuard
 
@@ -10,21 +10,26 @@ class MockLLM:
 
     def invoke(self, prompt: str) -> str:
         PHIGuard.assert_no_phi(prompt)
-        return f"[{self.system_name} Deterministic Verification Engine]: Clinical & scientific analysis verified for query: '{prompt[:60]}...'. Parameters evaluated under wwPDB / IUPAC / OpenSMILES / ISAC Standards."
+        excerpt = prompt[:80]
+        return (
+            f"[{self.system_name} mock responder] No external model was called. "
+            "This endpoint does not validate scientific correctness. "
+            f"Received: '{excerpt}...'"
+        )
 
 
 class LLMFactory:
-    """Creates configured LLM client instances with zero-PHI protection."""
+    """Create the deterministic mock responder used by the current repository."""
 
     @staticmethod
-    def create(provider: str = "mock", system_name: str = "Crispr Prime Editing Pegdna Agent"):
+    def create(
+        provider: str = "mock",
+        system_name: str = "Crispr Prime Editing Pegdna Agent",
+    ):
         prov = str(provider).lower()
-        if prov in ["mock", "deterministic", "test"]:
-            return MockLLM(system_name)
-        elif prov in ["ollama", "local"]:
-            return MockLLM(system_name)
-        elif prov in ["claude", "anthropic"]:
-            return MockLLM(system_name)
-        elif prov in ["openai", "gpt4"]:
-            return MockLLM(system_name)
+        if prov not in {"mock", "deterministic", "test"}:
+            raise ValueError(
+                f"Unsupported model provider {provider!r}; "
+                "this repository currently implements only the mock provider."
+            )
         return MockLLM(system_name)
