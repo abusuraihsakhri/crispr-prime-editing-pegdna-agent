@@ -1,12 +1,10 @@
 """
-Data Models & Telemetry Definitions for PrimeEditing-Designer: pegRNA Primer Binding & RT Template Agent.
-Domain: Genome Engineering
-Standard: Anzalone 2019 Prime Editing Architecture
+Data models for the lightweight deterministic prime-editing metric evaluator.
 """
 import datetime
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict
 
 
 class ExecutionStatus(str, Enum):
@@ -24,7 +22,11 @@ class FrontierPayload:
     status_descriptor: str
     is_critical_flag: bool = False
     attributes: Dict[str, Any] = field(default_factory=dict)
-    timestamp: str = field(default_factory=lambda: datetime.datetime.now(datetime.timezone.utc).isoformat())
+    timestamp: str = field(
+        default_factory=lambda: datetime.datetime.now(
+            datetime.timezone.utc
+        ).isoformat()
+    )
 
 
 @dataclass
@@ -35,8 +37,12 @@ class AgentTelemetryAlert:
     summary: str
     technical_details: str
     actionable_remediation: str
-    standard_reference: str = "Anzalone 2019 Prime Editing Architecture"
-    timestamp: str = field(default_factory=lambda: datetime.datetime.now(datetime.timezone.utc).isoformat())
+    standard_reference: str = "Repository-defined rule thresholds"
+    timestamp: str = field(
+        default_factory=lambda: datetime.datetime.now(
+            datetime.timezone.utc
+        ).isoformat()
+    )
 
     def to_dict(self) -> Dict[str, Any]:
         return {
