@@ -43,3 +43,6 @@ Repository = "https://github.com/abusuraihsakhri/crispr-prime-editing-pegdna-age
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.setuptools.packages.find]
+include = ["agents*", "prime_editing_agent*"]
