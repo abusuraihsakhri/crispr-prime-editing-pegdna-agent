@@ -6,7 +6,7 @@ import csv
 import math
 import sys
 
-from agents.base import AuditLogger
+from agents.base import AuditLogger, SecurityException
 from agents.models import SystemTaskPayload
 from agents.supervisor import SystemSupervisor
 
@@ -43,6 +43,16 @@ def _parse_float(value, default: float, field_name: str) -> float:
     return parsed
 
 
+def _finite_cli_float(value: str) -> float:
+    try:
+        parsed = float(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("Expected a finite numeric value.") from exc
+    if not math.isfinite(parsed):
+        raise argparse.ArgumentTypeError("Expected a finite numeric value.")
+    return parsed
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(
         prog="crispr-prime-editing-pegdna-agent",
@@ -53,8 +63,8 @@ def main(argv=None):
     p_audit = subparsers.add_parser("audit", help="Run single task evaluation")
     p_audit.add_argument("--task-id", default="TASK-2026-001")
     p_audit.add_argument("--target", default="KEY-TARGET-01")
-    p_audit.add_argument("--primary", type=float, default=28.5)
-    p_audit.add_argument("--secondary", type=float, default=14.2)
+    p_audit.add_argument("--primary", type=_finite_cli_float, default=28.5)
+    p_audit.add_argument("--secondary", type=_finite_cli_float, default=14.2)
     p_audit.add_argument("--critical", action="store_true")
     p_audit.add_argument("--status", default="DISCORDANT")
 
@@ -82,7 +92,11 @@ def main(argv=None):
             status_descriptor=args.status,
             is_critical_flag=args.critical,
         )
-        dossier = supervisor.process_task(payload)
+        try:
+            dossier = supervisor.process_task(payload)
+        except SecurityException as exc:
+            print(f"Error: {exc}", file=sys.stderr)
+            return 1
         print("=" * 80)
         print("  CRISPR PRIME EDITING PEGDNA AGENT")
         print(
@@ -141,6 +155,8 @@ def main(argv=None):
 
         for row_number, row in enumerate(rows, start=2):
             try:
+                if None in row:
+                    raise ValueError("more values than CSV header columns")
                 payload = SystemTaskPayload(
                     task_id=row.get("task_id") or "TASK-01",
                     target_identifier=row.get("target_identifier") or "TARGET-01",
@@ -153,11 +169,10 @@ def main(argv=None):
                     status_descriptor=row.get("status_descriptor") or "NOMINAL",
                     is_critical_flag=_parse_bool(row.get("is_critical_flag")),
                 )
-            except ValueError as exc:
+                dossier = supervisor.process_task(payload)
+            except (ValueError, SecurityException) as exc:
                 print(f"Error: CSV row {row_number}: {exc}", file=sys.stderr)
                 return 1
-
-            dossier = supervisor.process_task(payload)
             row_dict = dict(row)
             row_dict["overall_urgency"] = dossier.overall_urgency.value
             row_dict["integrity_status"] = dossier.integrity_status.value
