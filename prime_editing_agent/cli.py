@@ -42,6 +42,16 @@ def _parse_float(value, default: float, field_name: str) -> float:
     return parsed
 
 
+def _finite_cli_float(value: str) -> float:
+    try:
+        parsed = float(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("Expected a finite numeric value.") from exc
+    if not math.isfinite(parsed):
+        raise argparse.ArgumentTypeError("Expected a finite numeric value.")
+    return parsed
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(
         prog="crispr-prime-editing-pegdna-agent",
@@ -52,8 +62,8 @@ def main(argv=None):
     p_audit = subparsers.add_parser("audit", help="Run single task evaluation")
     p_audit.add_argument("--task-id", default="TASK-2026-001")
     p_audit.add_argument("--target", default="TARGET-GEN-01")
-    p_audit.add_argument("--primary", type=float, default=29.4)
-    p_audit.add_argument("--secondary", type=float, default=15.1)
+    p_audit.add_argument("--primary", type=_finite_cli_float, default=29.4)
+    p_audit.add_argument("--secondary", type=_finite_cli_float, default=15.1)
     p_audit.add_argument("--critical", action="store_true")
     p_audit.add_argument("--status", default="DISCORDANT")
 
@@ -129,6 +139,8 @@ def main(argv=None):
 
         for row_number, row in enumerate(rows, start=2):
             try:
+                if None in row:
+                    raise ValueError("more values than CSV header columns")
                 payload = FrontierPayload(
                     task_id=row.get("task_id") or "TASK-01",
                     target_identifier=row.get("target_identifier") or "TARGET-01",

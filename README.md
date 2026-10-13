@@ -12,9 +12,9 @@ A small Python and browser toolkit for applying deterministic, repository-define
 - Status-keyword checks for configured discordance/anomaly terms.
 - Single-record and CSV batch CLI workflows.
 - FastAPI endpoints for health, evaluation, chat-style mock responses, and audit metadata.
-- In-memory HMAC-SHA256 audit chaining for the audited Python workflow.
+- Thread-safe in-memory HMAC-SHA256 audit chaining for the audited Python workflow.
 - Pattern-based outbound identifier guard for several common identifier formats.
-- Compact single-screen desktop GitHub Pages workbench with side-by-side inputs and results, nominal/elevated/critical presets, JSON copy/download, and no backend request; narrow screens use a stacked layout.
+- Compact single-screen desktop GitHub Pages workbench with side-by-side inputs and results, nominal/elevated/critical presets, JSON copy/download, and no backend request; narrow screens use a stacked layout. Results and exports are cleared whenever inputs change.
 - Docker image and Compose configuration.
 - Pytest regression tests, lightweight Ruff checks, dependency auditing, and container smoke tests in GitHub Actions.
 
@@ -112,7 +112,7 @@ Expected columns:
 | `is_critical_flag` | No | `true/false`, `yes/no`, `on/off`, or `1/0` |
 | `status_descriptor` | No | Free-text status descriptor |
 
-Invalid non-finite numbers or unrecognized boolean strings are rejected instead of being silently coerced.
+Invalid non-finite numbers, unrecognized boolean strings, and CSV rows containing extra columns are rejected instead of being silently coerced. Both FastAPI interfaces reject non-finite numeric inputs, and the CLI audit commands reject non-finite numeric arguments.
 
 ## REST API
 
@@ -131,10 +131,10 @@ FastAPI also serves the generated OpenAPI schema at `/openapi.json`.
 ## Privacy and security notes
 
 - The identifier guard is a regex-based safety filter, not a HIPAA de-identification guarantee.
-- The HMAC audit trail is in memory only; it is lost when the process exits.
+- The HMAC audit trail is in memory only; it is lost when the process exits. Concurrent writes are serialized, and read operations return snapshots rather than mutable internal entries.
 - HMAC integrity detects mutation of entries within the current process state; it is not a durable append-only ledger.
 - The repository does not require external model/API credentials for its current deterministic workflows.
-- The static browser application has a restrictive Content Security Policy and does not make network requests.
+- The static browser application has a restrictive Content Security Policy and does not make network requests. It interprets explicit false flags correctly and rejects unknown flag strings.
 - GitHub Actions are pinned to immutable commit SHAs.
 
 ## Testing and checks

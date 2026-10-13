@@ -67,4 +67,39 @@ try {
 }
 assert(blankRejected, "blank numeric input must be rejected");
 
+result = evaluate({
+  task_id: "T5",
+  target_identifier: "TARGET-5",
+  primary_metric: 10,
+  secondary_metric: 4,
+  status_descriptor: "nominal",
+  is_critical_flag: "false",
+});
+assert(result.overall_urgency === "ROUTINE", "string false must not activate critical mode");
+
+result = evaluate({
+  task_id: "T6",
+  target_identifier: "TARGET-6",
+  primary_metric: 25,
+  secondary_metric: 12,
+  status_descriptor: "nominal",
+  is_critical_flag: false,
+});
+assert(result.total_alerts === 0, "exact threshold boundary must be nominal");
+
+let invalidFlagRejected = false;
+try {
+  evaluate({
+    task_id: "T7",
+    target_identifier: "TARGET-7",
+    primary_metric: 10,
+    secondary_metric: 4,
+    status_descriptor: "NOMINAL",
+    is_critical_flag: "sometimes",
+  });
+} catch (error) {
+  invalidFlagRejected = /boolean/.test(String(error));
+}
+assert(invalidFlagRejected, "invalid critical flag must be rejected");
+
 console.log("Browser evaluator smoke test passed.");

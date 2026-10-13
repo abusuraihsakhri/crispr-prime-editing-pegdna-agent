@@ -23,12 +23,20 @@
     return parsed;
   }
 
+  function parseCriticalFlag(value) {
+    if (typeof value === "boolean") return value;
+    const normalized = String(value ?? "").trim().toLowerCase();
+    if (["1", "true", "t", "yes", "y", "on"].includes(normalized)) return true;
+    if (["0", "false", "f", "no", "n", "off", ""].includes(normalized)) return false;
+    throw new Error("Critical override must be a boolean value.");
+  }
+
   function evaluatePayload(payload) {
     const primary = requireFiniteNumber(payload.primary_metric, "Primary metric");
     const secondary = requireFiniteNumber(payload.secondary_metric, "Secondary metric");
     const descriptor = String(payload.status_descriptor || "NOMINAL");
     const descriptorUpper = descriptor.toUpperCase();
-    const isCritical = Boolean(payload.is_critical_flag);
+    const isCritical = parseCriticalFlag(payload.is_critical_flag);
     const alerts = [];
 
     if (primary > PRIMARY_BOUND) {
@@ -125,6 +133,16 @@
     let runCount = 0;
     let lastResult = null;
 
+    function invalidateResult() {
+      if (!lastResult) return;
+      lastResult = null;
+      output.hidden = true;
+      empty.hidden = false;
+      empty.querySelector("h3").textContent = "Inputs changed";
+      empty.querySelector("p").textContent = "Run evaluation to refresh results and JSON exports.";
+      field("copy-json").textContent = "Copy JSON";
+    }
+
     function clearErrors() {
       errorBox.hidden = true;
       errorBox.textContent = "";
@@ -145,11 +163,13 @@
         button.setAttribute("aria-pressed", String(selected));
       }
       clearErrors();
+      invalidateResult();
     }
 
     presets.forEach((button) => button.addEventListener("click", () => setPreset(button.dataset.preset)));
     form.addEventListener("input", () => {
       clearErrors();
+      invalidateResult();
       presets.forEach((button) => {
         button.classList.remove("active");
         button.setAttribute("aria-pressed", "false");
@@ -172,6 +192,7 @@
 
     function render(result) {
       lastResult = result;
+      field("copy-json").textContent = "Copy JSON";
       runCount += 1;
       field("run-count").textContent = runCount + (runCount === 1 ? " run" : " runs");
       empty.hidden = true;
@@ -244,7 +265,7 @@
       document.body.appendChild(link);
       link.click();
       link.remove();
-      URL.revokeObjectURL(url);
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
     });
   }
 
