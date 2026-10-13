@@ -22,8 +22,8 @@ class SystemIntegrityStatus(str, Enum):
 class SystemTaskPayload(BaseModel):
     task_id: str = Field(..., description="Unique task identifier")
     target_identifier: str = Field(..., description="Non-secret target identifier")
-    primary_metric: float = Field(..., description="Primary numeric input")
-    secondary_metric: float = Field(default=0.0, description="Secondary numeric input")
+    primary_metric: float = Field(..., allow_inf_nan=False, description="Primary finite numeric input")
+    secondary_metric: float = Field(default=0.0, allow_inf_nan=False, description="Secondary finite numeric input")
     status_descriptor: str = Field(default="NOMINAL", description="Status descriptor")
     is_critical_flag: bool = Field(default=False, description="Explicit critical-priority trigger")
     attributes: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
